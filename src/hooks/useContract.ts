@@ -9,11 +9,6 @@ declare global {
       on: (event: string, callback: (accounts: string[]) => void) => void;
       removeListener: (event: string, callback: (accounts: string[]) => void) => void;
     };
-    nightly?: {
-      request: (args: { method: string; params?: any[] }) => Promise<any>;
-      on: (event: string, callback: (accounts: string[]) => void) => void;
-      removeListener: (event: string, callback: (accounts: string[]) => void) => void;
-    };
   }
 }
 
@@ -149,12 +144,9 @@ export const useContract = () => {
 
   useEffect(() => {
     const initializeContract = async () => {
-      // Check for any available wallet provider
-      const provider = window.nightly || window.ethereum;
-      
-      if (provider) {
+      if (typeof window.ethereum !== 'undefined') {
         try {
-          console.log('Initializing contract with provider:', provider === window.nightly ? 'Nightly' : 'Standard');
+          console.log('Initializing contract with ethereum provider');
           
           // For now, we'll use a mock contract
           setContract({
@@ -194,7 +186,7 @@ export const useContract = () => {
           });
         }
       } else {
-        console.log('No wallet provider found');
+        console.log('No ethereum provider found');
       }
     };
 

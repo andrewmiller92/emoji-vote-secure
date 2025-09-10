@@ -40,7 +40,7 @@ export const PollCard: React.FC<PollCardProps> = ({
   const handleVote = async (optionId: string) => {
     if (hasVoted || isVoting) return;
 
-    if (!window.nightly && typeof window.ethereum === 'undefined') {
+    if (typeof window.ethereum === 'undefined') {
       toast({
         title: "Wallet Required",
         description: "Please install and connect a Web3 wallet (MetaMask, Nightly, etc.) to vote.",
