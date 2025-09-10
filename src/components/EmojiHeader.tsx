@@ -1,5 +1,5 @@
 import React from 'react';
-import { WalletConnect } from './ui/wallet-connect';
+import { RainbowWalletConnect } from './ui/rainbow-wallet-connect';
 import { Shield, Lock } from 'lucide-react';
 
 export const EmojiHeader: React.FC = () => {
@@ -40,7 +40,7 @@ export const EmojiHeader: React.FC = () => {
             </div>
           </div>
           
-          <WalletConnect />
+          <RainbowWalletConnect />
         </div>
 
         {/* Security indicator */}
