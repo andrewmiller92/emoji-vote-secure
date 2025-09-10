@@ -1,0 +1,165 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Vibrant emoji-inspired color palette */
+    --background: 248 100% 98%;
+    --foreground: 230 15% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 230 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 230 15% 15%;
+
+    /* Vibrant purple-blue gradient primary */
+    --primary: 260 95% 65%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 280 85% 75%;
+
+    /* Warm orange-pink secondary */
+    --secondary: 25 95% 85%;
+    --secondary-foreground: 25 85% 25%;
+
+    --muted: 240 20% 96%;
+    --muted-foreground: 240 10% 45%;
+
+    /* Bright accent colors */
+    --accent: 150 85% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 85% 65%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 20% 88%;
+    --input: 240 20% 92%;
+    --ring: 260 95% 65%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-secondary: linear-gradient(135deg, hsl(25 95% 75%), hsl(340 85% 75%));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(180 85% 65%));
+    --gradient-background: linear-gradient(180deg, hsl(248 100% 98%), hsl(260 30% 96%));
+
+    /* Shadows */
+    --shadow-poll: 0 8px 32px -8px hsl(var(--primary) / 0.2);
+    --shadow-card: 0 4px 20px -4px hsl(240 20% 70% / 0.15);
+    --shadow-emoji: 0 4px 16px -4px hsl(var(--accent) / 0.3);
+
+    --radius: 1rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Dark mode with vibrant accents */
+    --background: 230 25% 8%;
+    --foreground: 240 20% 92%;
+
+    --card: 230 20% 10%;
+    --card-foreground: 240 20% 92%;
+
+    --popover: 230 20% 10%;
+    --popover-foreground: 240 20% 92%;
+
+    --primary: 260 95% 75%;
+    --primary-foreground: 230 25% 8%;
+    --primary-glow: 280 85% 85%;
+
+    --secondary: 230 15% 20%;
+    --secondary-foreground: 240 20% 92%;
+
+    --muted: 230 15% 15%;
+    --muted-foreground: 240 10% 60%;
+
+    --accent: 150 85% 70%;
+    --accent-foreground: 230 25% 8%;
+
+    --destructive: 0 85% 70%;
+    --destructive-foreground: 230 25% 8%;
+
+    --border: 230 15% 20%;
+    --input: 230 15% 18%;
+    --ring: 260 95% 75%;
+
+    /* Dark gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-secondary: linear-gradient(135deg, hsl(25 75% 65%), hsl(340 75% 65%));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(180 85% 70%));
+    --gradient-background: linear-gradient(180deg, hsl(230 25% 8%), hsl(260 20% 12%));
+
+    /* Dark shadows */
+    --shadow-poll: 0 8px 32px -8px hsl(var(--primary) / 0.4);
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
+    --shadow-emoji: 0 4px 16px -4px hsl(var(--accent) / 0.4);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-gradient-to-b from-background to-background/80 text-foreground min-h-screen;
+    background-image: var(--gradient-background);
+  }
+
+  /* Custom animations */
+  .animate-bounce-gentle {
+    animation: bounce-gentle 2s infinite;
+  }
+
+  @keyframes bounce-gentle {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-8px);
+    }
+    60% {
+      transform: translateY(-4px);
+    }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-glow {
+    from {
+      box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+    }
+    to {
+      box-shadow: 0 0 40px hsl(var(--primary) / 0.6);
+    }
+  }
+}
