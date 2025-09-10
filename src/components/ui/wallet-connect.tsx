@@ -17,6 +17,21 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({ className }) => {
   // Check if wallet is already connected on component mount
   useEffect(() => {
     const checkWalletConnection = async () => {
+      // Check for Nightly wallet first
+      if (window.nightly) {
+        try {
+          const accounts = await window.nightly.request({ method: 'eth_accounts' });
+          if (accounts.length > 0) {
+            setIsConnected(true);
+            setAddress(accounts[0]);
+            return;
+          }
+        } catch (error) {
+          console.log('Nightly wallet not connected:', error);
+        }
+      }
+      
+      // Fallback to standard ethereum provider
       if (typeof window.ethereum !== 'undefined') {
         try {
           const accounts = await window.ethereum.request({ method: 'eth_accounts' });
@@ -34,20 +49,34 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({ className }) => {
   }, []);
 
   const connectWallet = async () => {
-    if (typeof window.ethereum === 'undefined') {
-      toast({
-        title: "Wallet Not Found",
-        description: "Please install MetaMask or another Web3 wallet to continue.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsConnecting(true);
+    
     try {
-      const accounts = await window.ethereum.request({
-        method: 'eth_requestAccounts',
-      });
+      let accounts: string[] = [];
+      
+      // Try Nightly wallet first
+      if (window.nightly) {
+        try {
+          accounts = await window.nightly.request({
+            method: 'eth_requestAccounts',
+          });
+          console.log('Connected to Nightly wallet');
+        } catch (error) {
+          console.log('Nightly wallet connection failed:', error);
+        }
+      }
+      
+      // Fallback to standard ethereum provider
+      if (accounts.length === 0 && typeof window.ethereum !== 'undefined') {
+        try {
+          accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts',
+          });
+          console.log('Connected to standard wallet');
+        } catch (error) {
+          console.log('Standard wallet connection failed:', error);
+        }
+      }
       
       if (accounts.length > 0) {
         setIsConnected(true);
@@ -56,12 +85,14 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({ className }) => {
           title: "Wallet Connected",
           description: "Your wallet has been successfully connected.",
         });
+      } else {
+        throw new Error('No wallet found or connection failed');
       }
     } catch (error: any) {
       console.error('Error connecting wallet:', error);
       toast({
         title: "Connection Failed",
-        description: error.message || "Failed to connect wallet. Please try again.",
+        description: "Please install and unlock a Web3 wallet (MetaMask, Nightly, etc.) to continue.",
         variant: "destructive",
       });
     } finally {
@@ -135,6 +166,11 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({ className }) => {
 declare global {
   interface Window {
     ethereum?: {
+      request: (args: { method: string; params?: any[] }) => Promise<any>;
+      on: (event: string, callback: (accounts: string[]) => void) => void;
+      removeListener: (event: string, callback: (accounts: string[]) => void) => void;
+    };
+    nightly?: {
       request: (args: { method: string; params?: any[] }) => Promise<any>;
       on: (event: string, callback: (accounts: string[]) => void) => void;
       removeListener: (event: string, callback: (accounts: string[]) => void) => void;

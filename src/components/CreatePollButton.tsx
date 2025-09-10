@@ -50,10 +50,10 @@ export const CreatePollButton: React.FC = () => {
       return;
     }
 
-    if (typeof window.ethereum === 'undefined') {
+    if (!window.nightly && typeof window.ethereum === 'undefined') {
       toast({
         title: "Wallet Required",
-        description: "Please connect your wallet to create a poll.",
+        description: "Please install and connect a Web3 wallet (MetaMask, Nightly, etc.) to create a poll.",
         variant: "destructive",
       });
       return;

@@ -1,6 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useToast } from './use-toast';
 
+// Extend Window interface for TypeScript
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: { method: string; params?: any[] }) => Promise<any>;
+      on: (event: string, callback: (accounts: string[]) => void) => void;
+      removeListener: (event: string, callback: (accounts: string[]) => void) => void;
+    };
+    nightly?: {
+      request: (args: { method: string; params?: any[] }) => Promise<any>;
+      on: (event: string, callback: (accounts: string[]) => void) => void;
+      removeListener: (event: string, callback: (accounts: string[]) => void) => void;
+    };
+  }
+}
+
 // Contract ABI - This would be generated from the compiled contract
 const CONTRACT_ABI = [
   {
@@ -133,13 +149,12 @@ export const useContract = () => {
 
   useEffect(() => {
     const initializeContract = async () => {
-      if (typeof window.ethereum !== 'undefined') {
+      // Check for any available wallet provider
+      const provider = window.nightly || window.ethereum;
+      
+      if (provider) {
         try {
-          // This is a simplified version - in a real app you'd use ethers.js or web3.js
-          const provider = window.ethereum;
-          // const signer = provider.getSigner();
-          // const contractInstance = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-          // setContract(contractInstance);
+          console.log('Initializing contract with provider:', provider === window.nightly ? 'Nightly' : 'Standard');
           
           // For now, we'll use a mock contract
           setContract({
@@ -178,6 +193,8 @@ export const useContract = () => {
             variant: "destructive",
           });
         }
+      } else {
+        console.log('No wallet provider found');
       }
     };
 
