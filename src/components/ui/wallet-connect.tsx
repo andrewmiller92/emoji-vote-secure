@@ -3,6 +3,7 @@ import { Button } from './button';
 import { Wallet, ChevronDown, Copy, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { isWalletAvailable, waitForWallet, safeWalletRequest } from '@/utils/errorHandler';
 
 interface WalletConnectProps {
   className?: string;
@@ -17,29 +18,71 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({ className }) => {
   // Check if wallet is already connected on component mount
   useEffect(() => {
     const checkWalletConnection = async () => {
-      // Try to get the current provider (could be Nightly, MetaMask, etc.)
-      const provider = window.ethereum;
-      
-      if (provider) {
-        try {
-          const accounts = await provider.request({ method: 'eth_accounts' });
+      try {
+        // Wait for wallet to be available
+        const walletReady = await waitForWallet(3000);
+        
+        if (walletReady) {
+          const accounts = await safeWalletRequest('eth_accounts');
           if (accounts && accounts.length > 0) {
             setIsConnected(true);
             setAddress(accounts[0]);
             console.log('Wallet already connected:', accounts[0]);
           }
-        } catch (error) {
-          console.log('Error checking wallet connection:', error);
         }
+      } catch (error) {
+        // Ignore extension conflicts and other non-critical errors
+        console.log('Wallet connection check completed (some extensions may have conflicts)');
       }
     };
 
-    // Add a small delay to ensure wallet extensions are loaded
-    setTimeout(checkWalletConnection, 1000);
+    checkWalletConnection();
+
+    // Listen for account changes
+    const handleAccountsChanged = (accounts: string[]) => {
+      if (accounts.length > 0) {
+        setIsConnected(true);
+        setAddress(accounts[0]);
+        console.log('Account changed:', accounts[0]);
+      } else {
+        setIsConnected(false);
+        setAddress('');
+        console.log('Account disconnected');
+      }
+    };
+
+    // Listen for chain changes
+    const handleChainChanged = (chainId: string) => {
+      console.log('Chain changed:', chainId);
+      // Optionally refresh the page or show a notification
+    };
+
+    // Add event listeners if ethereum provider is available
+    if (window.ethereum) {
+      try {
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+        window.ethereum.on('chainChanged', handleChainChanged as any);
+      } catch (error) {
+        console.log('Could not add wallet event listeners:', error);
+      }
+    }
+
+    // Cleanup function
+    return () => {
+      if (window.ethereum) {
+        try {
+          window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+          window.ethereum.removeListener('chainChanged', handleChainChanged as any);
+        } catch (error) {
+          console.log('Could not remove wallet event listeners:', error);
+        }
+      }
+    };
   }, []);
 
   const connectWallet = async () => {
-    if (typeof window.ethereum === 'undefined') {
+    // Check if wallet is available
+    if (!isWalletAvailable()) {
       toast({
         title: "Wallet Not Found",
         description: "Please install MetaMask, Nightly, or another Web3 wallet to continue.",
@@ -51,10 +94,14 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({ className }) => {
     setIsConnecting(true);
     
     try {
-      // Request account access
-      const accounts = await window.ethereum.request({
-        method: 'eth_requestAccounts',
-      });
+      // Wait for wallet to be ready
+      const walletReady = await waitForWallet(2000);
+      if (!walletReady) {
+        throw new Error('Wallet not ready');
+      }
+      
+      // Request account access with safe wrapper
+      const accounts = await safeWalletRequest('eth_requestAccounts', [], 15000);
       
       if (accounts && accounts.length > 0) {
         setIsConnected(true);
@@ -64,19 +111,34 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({ className }) => {
           description: "Your wallet has been successfully connected.",
         });
         console.log('Wallet connected:', accounts[0]);
+      } else {
+        throw new Error('No accounts returned');
       }
     } catch (error: any) {
       console.error('Error connecting wallet:', error);
       
       let errorMessage = "Failed to connect wallet. Please try again.";
+      let errorTitle = "Connection Failed";
+      
       if (error.code === 4001) {
         errorMessage = "Connection rejected by user.";
+        errorTitle = "Connection Rejected";
       } else if (error.code === -32002) {
         errorMessage = "Connection request already pending.";
+        errorTitle = "Request Pending";
+      } else if (error.message === 'Request timeout') {
+        errorMessage = "Connection timed out. Please check your wallet and try again.";
+        errorTitle = "Connection Timeout";
+      } else if (error.message === 'Wallet not ready') {
+        errorMessage = "Wallet extension is not ready. Please try again in a moment.";
+        errorTitle = "Wallet Not Ready";
+      } else if (error.message?.includes('User denied')) {
+        errorMessage = "Connection was denied. Please approve the connection in your wallet.";
+        errorTitle = "Connection Denied";
       }
       
       toast({
-        title: "Connection Failed",
+        title: errorTitle,
         description: errorMessage,
         variant: "destructive",
       });
