@@ -69,9 +69,9 @@ export const RainbowWalletConnect: React.FC<RainbowWalletConnectProps> = ({ clas
   if (isConnected && address) {
     return (
       <div className={cn("flex items-center gap-2", className)}>
-        <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
+        <div className="flex items-center gap-2 px-3 py-2 bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded-lg">
           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          <span className="text-sm font-medium text-green-800">
+          <span className="text-sm font-medium text-green-900 dark:text-green-100">
             {formatAddress(address)}
           </span>
         </div>
@@ -80,7 +80,7 @@ export const RainbowWalletConnect: React.FC<RainbowWalletConnectProps> = ({ clas
           variant="outline"
           size="sm"
           onClick={() => copyToClipboard(address)}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
         >
           <Copy className="h-4 w-4" />
         </Button>
@@ -89,7 +89,7 @@ export const RainbowWalletConnect: React.FC<RainbowWalletConnectProps> = ({ clas
           variant="outline"
           size="sm"
           onClick={() => openInExplorer(address)}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
         >
           <ExternalLink className="h-4 w-4" />
         </Button>
@@ -98,7 +98,7 @@ export const RainbowWalletConnect: React.FC<RainbowWalletConnectProps> = ({ clas
           variant="outline"
           size="sm"
           onClick={handleDisconnect}
-          className="h-8 px-3"
+          className="h-8 px-3 border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
         >
           Disconnect
         </Button>
@@ -117,7 +117,7 @@ export const RainbowWalletConnect: React.FC<RainbowWalletConnectProps> = ({ clas
           }
         }}
         disabled={isPending}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
       >
         <Wallet className="h-4 w-4" />
         {isPending ? 'Connecting...' : 'Connect Wallet'}
@@ -132,7 +132,7 @@ export const RainbowWalletConnect: React.FC<RainbowWalletConnectProps> = ({ clas
               size="sm"
               onClick={() => handleConnect(connector)}
               disabled={isPending}
-              className="justify-start"
+              className="justify-start border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
             >
               <Wallet className="h-4 w-4 mr-2" />
               {connector.name}
